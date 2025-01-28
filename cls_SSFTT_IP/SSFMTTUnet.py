@@ -435,7 +435,7 @@ class SSFTTUnet(nn.Module):
 
 
 if __name__ == '__main__':
-        model = SSFTTUnet()#基于高光谱图像解混的空谱联合符号化Transformer的分类网络
+        model = SSFTTUnet()
         model.eval()
         print(model)
         #input = torch.randn(100, 200, 13, 13)
