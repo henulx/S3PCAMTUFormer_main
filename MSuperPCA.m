@@ -5,8 +5,8 @@ testdataset = 1;
 which_case = 'case1';
 p_subspace = 10;
 if testdataset==1  
-     scene_name = 'paviaU';
-     load('G:\PythonDemo\Test\S3PCAMTUFormer_main\data\PaviaU.mat')
+     scene_name = 'PU';
+     load('.\data\PaviaU.mat')
 else 
     scene_name = 'WashingtonDC';
     load img_clean_dc_withoutNormalization.mat;
@@ -14,7 +14,7 @@ else
 end
 fprintf(['\n','\n','Test dataset: ',scene_name,'  ',which_case,'\n']);
 
-img_clean = paviaU;
+img_clean = double(Houstondata);
 [row, column, band] = size(img_clean);
 N=row*column;
 
@@ -113,9 +113,9 @@ end
 addpath('.\Hyreconstruction\FastHyDe');
 addpath('.\Hyreconstruction\BM3D');
 [Pufigdata, time_fasthyde] = FastHyIn(img_noisy, M, noise_type, iid, p_subspace);
-save('G:\PythonDemo\Test\S3PCAMTUFormer_main\data\Pufigdata.mat','Pufigdata')
+save('.\data\Pufigdata.mat','Pufigdata')
 
-addpath('D:\Program Files\Polyspace\R2021a\toolbox\libsvm-3.21')
+addpath('.\Polyspace\R2021a\toolbox\libsvm-3.21')
 addpath('.\common');
 addpath('.\Entropy Rate Superpixel Segmentation\ERS');
 addpath('.\Entropy Rate Superpixel Segmentation');
@@ -123,30 +123,36 @@ addpath(genpath(cd));
 
 num_PC            =   30;  % THE optimal PCA dimension
 % num_Pixels        =  100*sqrt(2).^[-4:4]; % THE Numbers of Multiscale Superpixel IP
-num_Pixels        =   20*sqrt(2).^[-2:7]; % THE Numbers of Multiscale Superpixel PU [-2:6]
-% % num_Pixels        =   50*sqrt(2).^[-3:3]; % THE Numbers of Multiscale Superpixel SA 
-trainpercentage   =   26;  % Training Number per Class 0.005，PU
+num_Pixels        =   20*sqrt(2).^[-4:4]; % THE Numbers of Multiscale Superpixel PU
+% num_Pixels        =   50*sqrt(2).^[-3:3]; % THE Numbers of Multiscale Superpixel SA 
+% num_Pixels        =   20*sqrt(2).^[-4:4]; % THE Numbers of Multiscale Superpixel HO
+trainpercentage   =   24;  % Training Number per Class 0.005，PU
 iterNum           =   10;    % Trails
 % database  = 'Indian';
 database  = 'PaviaU';
 % database  = 'Salinas';
+% database = 'HO';
 
 for inum_Pixel = 1:size(num_Pixels,2)
     num_Pixel = num_Pixels(inum_Pixel);
     
     %% load the HSI dataset
     if strcmp(database,'Indian')
-        load G:\MatlabDemo\my-demo-main\datasets\figdata.mat;
+        load .\Indian_pines_corrected.mat;
         load Indian_pines_gt;
         load Indian_pines_randp 
-        data3D = figdata;        label_gt = indian_pines_gt;
+        data3D = indian_pines_corrected;        label_gt = indian_pines_gt;
     elseif strcmp(database,'Salinas')
-        load G:\MatlabDemo\my-demo-main\datasets\Salinas_corrected.mat;load G:\PythonDemo\Test\HSI_SSFTTU\data\Salinas_gt.mat;load G:\MatlabDemo\SuperPCA-master\datasets\Salinas_randp
+        load .\Salinas_corrected.mat;load .\Salinas_gt.mat;load .\Salinas_randp
         data3D = salinas_corrected;        
-        label_gt = salinas_gt;        
+        label_gt = salinas_gt;
+    elseif strcmp(database, 'HO')
+        load .\HOfigdata.mat;load .\Houstonlabel.mat;load .\Houston_gt_randp
+        data3D = double(HOfigdata);
+        label_gt = Houstonlabel;
     elseif strcmp(database,'PaviaU')    
-        load G:\PythonDemo\Test\S3PCAMTUFormer_main\data\Pufigdata.mat;load G:\PythonDemo\Test\MCNN\data\PaviaU_gt;load G:\MatlabDemo\SuperPCA-master\datasets\PaviaU_randp; 
-        data3D = Pufigdata;        label_gt = paviaU_gt;
+        load .\PaviaU.mat;load .\PaviaU_gt;load .\PaviaU_randp; 
+        data3D = paviaU;        label_gt = paviaU_gt;
     end
     data3D = data3D./max(data3D(:));
        
@@ -155,7 +161,8 @@ for inum_Pixel = 1:size(num_Pixels,2)
 
     %% SupePCA DR
     [dataDR] = SuperPCA(data3D,num_PC,labels);
-    iter = 1;%for pu and ip
+     iter = 10;%for pu and ip
+%     iter = 10;%for HO 
 %     iter = 5;%for SA 
     randpp=randp{iter};     
     % randomly divide the dataset to training and test samples
@@ -193,6 +200,7 @@ end
 predict_label = label_fusion(predict_labelS');
 [confusion, accuracy2, CR, FR] = confusion_matrix(predict_label', CTest);
 AA=sum(CR(1,:))/9;
+% AA=sum(CR(1,:))/15;
 % AA=sum(CR(1,:))/16;
 CR=CR*100
 OA=accuracy2;
