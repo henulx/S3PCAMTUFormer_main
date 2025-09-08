@@ -1,4 +1,4 @@
-
+%%
 function AP_fea = EMP(data, num_PC)
 %% /////////////////// Generate PCs //////////////////
 [row,col,dim] = size(data);
@@ -47,4 +47,5 @@ AP_fea = reshape(AP_fea, row, col, size(AP_fea,2));
 %% ////////////////////////////////////////////////////
 
 %data = NormalizeFea(data,1);
+
 % data = AP_fea;
