@@ -18,14 +18,17 @@ os.environ["TF_CUDNN_USE_AUTOTUNE"]="0"
 
 def loadData():
     #读入数据
-    data = sio.loadmat('G:\PythonDemo\Test\S3PCAMTUFormer_main\data\PaviaU.mat')['paviaU']
-    labels = sio.loadmat('G:\PythonDemo\Test\S3PCAMTUFormer_main\data\PaviaU_gt.mat')['paviaU_gt']
+    data = sio.loadmat('..\S3PCAMTUFormer_main\data\PaviaU.mat')['paviaU']
+    labels = sio.loadmat('..\S3PCAMTUFormer_main\data\PaviaU_gt.mat')['paviaU_gt']
 
-    # data = sio.loadmat('D:\PythonHSIDemo\S3PCAMTUFormer_main\data\Indian_pines_corrected.mat')['indian_pines_corrected']
-    # labels = sio.loadmat('D:\PythonHSIDemo\S3PCAMTUFormer_main\data\Indian_pines_gt.mat')['indian_pines_gt']
+    # data = sio.loadmat('..\S3PCAMTUFormer_main\data\Indian_pines_corrected.mat')['indian_pines_corrected']
+    # labels = sio.loadmat('..\S3PCAMTUFormer_main\data\Indian_pines_gt.mat')['indian_pines_gt']
 
-    #data = sio.loadmat('D:\PythonHSIDemo\S3PCAMTUFormer_main\data\Salinas_corrected.mat')['salinas_corrected']
-    #labels = sio.loadmat('D:\PythonHSIDemo\S3PCAMTUFormer_main\data\Salinas_gt.mat')['salinas_gt']
+    #data = sio.loadmat('..\S3PCAMTUFormer_main\data\Salinas_corrected.mat')['salinas_corrected']
+    #labels = sio.loadmat('..\S3PCAMTUFormer_main\data\Salinas_gt.mat')['salinas_gt']
+
+    # data = sio.loadmat('..\S3PCAMTUFormer_main\data\Houstondata.mat')['Houstondata']
+    # labels = sio.loadmat('..\S3PCAMTUFormer_main\data\Houstonlabel.mat')['Houstonlabel']
 
     return data, labels
 
@@ -126,12 +129,14 @@ class TrainDS(torch.utils.data.Dataset):
 
 def create_data_loader():
     #地物类别
+    # class_num = 15
     class_num = 9
     # class_num = 16
     #读入数据
     X,y = loadData()
     # 用于测试样本的比例
     test_ratio = 0.995#work PU
+    # test_ratio = 0.97  #work HO
     # test_ratio = 0.933#work IP
     #test_ratio = 0.995  #work SA
     # 每个像素周围提取 patch 的尺寸
@@ -213,21 +218,11 @@ def train(train_loader, epochs):
         for i, (data, target) in enumerate(train_loader):
             data= data.cuda()#torch.Size([64, 30, 13, 13])GPU
             target = target.cuda()#GPU
-            # data = data.to(device)  # torch.Size([64, 30, 13, 13])
-            # target = target.to(device)
             # 正向传播 +　反向传播 + 优化
             # 通过输入得到预测的输出
             #outputs = net(data)
-            batch_pred, re_unmix, re_unmix_nonlinear = net(data)#这里出问题了
-            # band = re_unmix.shape[1]//2
-            # output_linear = re_unmix[:, 0:band] + re_unmix[:, band:band * 2]
-            # re_unmix = re_unmix_nonlinear + output_linear
-
-            #sad_loss = torch.mean(torch.acos(torch.sum(data * re_unmix, dim=1) /
-            #                                (torch.norm(re_unmix, dim=1, p=2) * torch.norm(data, dim=1, p=2))))
-            # 计算总体损失函数
-            #loss = criterion(batch_pred, target) + sad_loss #出问题了
-            loss = criterion(batch_pred, target) # 出问题了
+            batch_pred, re_unmix, re_unmix_nonlinear = net(data)
+            loss = criterion(batch_pred, target)
             # 优化器梯度归零
             optimizer.zero_grad()
             # 反向传播
@@ -275,6 +270,8 @@ def acc_reports(y_test, y_pred_test):
 
     target_names = ['Asphalt','Meadows','Gravel','Trees', 'Painted metal sheets','Bare Soil','Bitumen',
                          'Self-Blocking Bricks','Shadows']
+    # target_names = ['Healthy-grass','Stressed-grass','Synthetic-grass','Trees','Soil','Water','Residential','Commercial',
+    #                  'Road','Highway','Railway','Parking-Lot 1','Parking-Lot 2','Tennis-Court','Running-Track']
     # target_names = ['Alfalfa', 'Corn-notill', 'Corn-mintill', 'Corn',
     #                     'Grass-pasture', 'Grass-trees', 'Grass-pasture-mowed',
     #                     'Hay-windrowed', 'Oats', 'Soybean-notill', 'Soybean-mintill',
@@ -297,8 +294,9 @@ if __name__ == '__main__':
     train_loader, test_loader, all_data_loader, y_all= create_data_loader()
     tic1 = time.perf_counter()
     net, device = train(train_loader, epochs=100)
+    print('Total params: %.2fM' % (sum(p.numel() for p in net.parameters())/1000000.0))
     # 只保存模型参数
-    torch.save(net.state_dict(), 'G:\PythonDemo\Test\S3PCAMTUFormer_main\cls_params\SSFTTnet_params.pth')
+    torch.save(net.state_dict(), '..\cls_params\SSFMTTnet_params.pth')
     toc1 = time.perf_counter()
     tic2 = time.perf_counter()
     y_pred_test, y_test = test(device, net, test_loader)
@@ -306,7 +304,7 @@ if __name__ == '__main__':
     # 评价指标
     classification, oa, confusion, each_acc, aa, kappa = acc_reports(y_test, y_pred_test)
     LRS_MSuperPCA = [95.4731264193793,	98.1098641464855	,99.1316931982634,	93.1204739960500	,95.8301743745262,
-                     96.0623625824505,	98.0828220858896	,98.1126914660832,	99.1313789359392]
+                     96.0623625824505,	98.0828220858896	,98.1126914660832,	99.1313789359392]#PU
     LRS_MSuperPCA_each_acc = np.array(LRS_MSuperPCA)
     each_acc = np.array(each_acc)
     All_each_acc = np.row_stack((each_acc, LRS_MSuperPCA_each_acc))
@@ -334,7 +332,7 @@ if __name__ == '__main__':
     CategoryAccuracy = get_max_value(All_each_acc)
     AverageAccuracy = sum(CategoryAccuracy) / len(CategoryAccuracy)
     OverallAccuracy = np.dot(UP_Samples, CategoryAccuracy) / UP_SumNum
-    file_name = "G:\PythonDemo\Test\S3PCAMTUFormer_main\cls_result\classification_report.txt"
+    file_name = "..\S3PCAMTUFormer_main\cls_result\classification_report.txt"
     with open(file_name, 'w') as x_file:
         x_file.write('{} Training_Time (s)'.format(Training_Time))
         x_file.write('\n')
