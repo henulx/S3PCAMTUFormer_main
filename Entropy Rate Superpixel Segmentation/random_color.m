@@ -11,7 +11,7 @@ function [out] = random_color(img,labels,nC)
 %	out     : the colored image.
 %
 % Copyright 2011, Ming-Yu Liu <mingyliu@umiacs.umd.edu>
-%
+%%%
 [height width dim] = size(img);
 rimg = zeros(height,width);
 gimg = zeros(height,width);
@@ -25,4 +25,5 @@ end
 out = img;
 out(:,:,1) = rimg;
 out(:,:,2) = gimg;
+
 out(:,:,3) = bimg;
