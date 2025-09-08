@@ -2,13 +2,16 @@ clc
 clear
 close all
 
-database = 'KSC';
+database = 'Houston';
 
-load([database '_gt.mat']);
+load('.\Houstonlabel.mat');
 
-gth = KSC_gt;
+gth = Houstonlabel;
 
 IterNum = 10;
 randp = randpGen(gth,IterNum);
 save([database '_gt_randp.mat']);
+
+
+
 
