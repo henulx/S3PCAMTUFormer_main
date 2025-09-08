@@ -1,9 +1,11 @@
-import PIL #PIL(Python Imaging Library)是一个用于打开、编辑和保存多种图像文件格式的库
+import PIL
 import time
 import torch
-import torchvision#torch类型的数据
+import torchvision
 import torch.nn.functional as F
 from einops import rearrange
+from thop import profile
+from thop import clever_format
 from torch import nn
 import torch.nn.init as init
 
@@ -100,8 +102,10 @@ class Transformer(nn.Module):
             x = mlp(x)
         return x
 
-NUM_CLASS = 9
-# NUM_CLASS = 16
+
+# NUM_CLASS = 9
+# NUM_CLASS = 15
+NUM_CLASS = 16
 
 class Spectral(nn.Module):
     def __init__(self,L1):
@@ -271,13 +275,14 @@ class SSFTTUnet(nn.Module):
             nn.ReLU(),
         )
         self.convm0 = nn.Sequential(
-            nn.Conv2d(64, 9, kernel_size=1, padding=0),
+            nn.Conv2d(64, 16, kernel_size=1, padding=0),
             nn.Sigmoid(),
-        )##UP
+        )
+        ##消融实验残差网络
         # self.convm0 = nn.Sequential(
-        #     nn.Conv2d(64, 16, kernel_size=1, padding=0),
+        #     nn.Conv2d(30, 9, kernel_size=1, padding=0),
         #     nn.Sigmoid(),
-        # )##IP
+        # )
         # unmixing module
         # self.unmix_encoder = nn.Sequential(
         #     nn.Conv2d(30, 15, kernel_size=(1,1), stride=1, padding=0),
@@ -335,8 +340,8 @@ class SSFTTUnet(nn.Module):
         torch.nn.init.xavier_normal_(self.token_wV)
 
         #self.pos_embedding = nn.Parameter(torch.empty(1, (num_tokens+1), dim))
-        #self.pos_embedding = nn.Parameter(torch.empty(1, 13, dim))
         self.pos_embedding = nn.Parameter(torch.empty(1, 13, dim))
+        # self.pos_embedding = nn.Parameter(torch.empty(1, 5, dim))
         torch.nn.init.normal_(self.pos_embedding, std=.02)
 
         self.cls_token = nn.Parameter(torch.zeros(1,1,dim))
@@ -346,8 +351,9 @@ class SSFTTUnet(nn.Module):
 
         self.to_cls_token = nn.Identity()
 
-        # self.nn1 = nn.Linear(640, num_classes)  # 640*16,IP或者SA
-        self.nn1 = nn.Linear(505, num_classes)  #388*9,UP
+        self.nn1 = nn.Linear(848, num_classes)  # 640*16,IP或者SA
+        # self.nn1 = nn.Linear(505, num_classes)  #388*9,UP
+        # self.nn1 = nn.Linear(799, num_classes)  # 799*9,HO
 
         torch.nn.init.xavier_normal_(self.nn1.weight)
         torch.nn.init.normal_(self.nn1.bias, std=1e-6)
@@ -420,6 +426,7 @@ class SSFTTUnet(nn.Module):
 
         cls_tokens = self.cls_token.expand(x.shape[0], -1,-1)#size(64,1,64)
         TransformerInput = torch.cat((cls_tokens, T, T1, T2), dim=1)#size(64,13,64)
+        # TransformerInput = torch.cat((cls_tokens, T), dim=1)  #单尺度消融实验
         TransformerInput += self.pos_embedding#size(64,13,64)
         TransformerInput = self.dropout(TransformerInput)#size(64,13,64)
         TransformerInput = self.transformer(TransformerInput,mask)#size(64,13,64)
@@ -438,7 +445,9 @@ if __name__ == '__main__':
         model = SSFTTUnet()
         model.eval()
         print(model)
-        #input = torch.randn(100, 200, 13, 13)
-        input = torch.randn(32,30,15,15)
+        input = torch.randn(64,30,15,15)
+        MACs, params = profile(model, inputs=(input,))
+        MACs, params = clever_format([MACs, params], '%.3f')
+        print(f"运算量：{MACs}, 参数量：{params}")
         y = model(input)
         #print(y.size())
