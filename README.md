@@ -1,5 +1,4 @@
-This is the source code of the paper"S3PCA-MTUFormer: SuperPCA with Spatial-Spectral Multiscale Tokenization and
-Unmixing Transformer for Hyperspectral Image Classification". Welcome to reproduce it and provide your feedback.
+This is the source code of the paper"SuperPCA with Spatial-Spectral Multiscale Tokenization and Unmixing Transformer for Hyperspectral Image Classification". Welcome to reproduce it and provide your feedback.
 All data can be download from:
 Link: https://pan.baidu.com/s/1OSK1eR_3OlUakDena3oFjA?pwd=1234
 Code: 1234
