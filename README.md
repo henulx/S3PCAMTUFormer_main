@@ -8,7 +8,7 @@ develop a DenseNet-based, Dual-Branch Symmetric Unmixing (DBSU) module to genera
 Finally, the classification map obtained by combining SSMTT and DBSU provides complementary information to the SuperPCA-denoised classification map. This
 complementary information is further integrated through a secondary decision fusion module, significantly enhancing classification accuracy, particularly in few-shot
 conditions. Experiments on four real datasets show that our framework outperforms the current best method by 0.08%, 0.02%, 0.64%, and 0.14%, while maintaining a runtime of 8.09 seconds the Indian Pines dataset. Our framework can be applied to agricultural land cover classification.(publication in EAAI 2026)
-This is the source code of the paper"SuperPCA with Spatial-Spectral Multiscale Tokenization and Unmixing Transformer for Hyperspectral Image Classification". Welcome to reproduce it and provide your feedback.
+ This is the source code of the paper"SuperPCA with Spatial-Spectral Multiscale Tokenization and Unmixing Transformer for Hyperspectral Image Classification". Welcome to reproduce it and provide your feedback.
 All data can be download from:
 Link: https://pan.baidu.com/s/1OSK1eR_3OlUakDena3oFjA?pwd=1234
 Code: 1234
