@@ -10,3 +10,4 @@ Finally, the classification map obtained by combining SSMTT and DBSU provides co
 complementary information is further integrated through a secondary decision fusion module, significantly enhancing classification accuracy, particularly in few-shot
 conditions. Experiments on four real datasets show that our framework outperforms the current best method by 0.08%, 0.02%, 0.64%, and 0.14%, while maintaining a runtime of 8.09 seconds the Indian Pines dataset. Our framework can be applied to agricultural land cover classification.
 (Accept in EAAI 2026)
+https://github.com/henulx/S3PCAMTUFormer_main/tree/master
