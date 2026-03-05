@@ -1,4 +1,5 @@
 # S3PCAMTUFormer_main
+Abstract:
 Current Hyperspectral Image Classification (HSIC) methods based on Transformer architectures have limitations in capturing local spatial-semantic features and often
 ignore the inherent spectral-mixing phenomenon. These issues limit the models’ ability to fully utilize joint spatial-spectral information, leading to suboptimal classification
 performance, especially under few-shot conditions. To address these challenges, we propose a multitask Transformer framework for HSIC, called Spatial–Spectral
